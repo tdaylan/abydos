@@ -266,6 +266,4 @@ elif sys.argv[1] == 'plot':
     plt.close()
     
     ## known planets on the map 
-
-    
     
