@@ -12,6 +12,9 @@ import ttvr.util
 
 import numpy as np
 
+import tessmaps
+#from tessmaps.src import get_time_on_silicon as gts
+
 import matplotlib.pyplot as plt
 import numpy.random
 from scipy import stats
@@ -21,7 +24,6 @@ import allesfitter
 import emcee
 import h5py
 from astropy.coordinates import SkyCoord
-#from tessmaps.src import get_time_on_silicon as gts
 from allesfitter import config
 
 
@@ -582,5 +584,17 @@ def demo_kosm(gdat):
 
 allesfitter.post_proc(pathdata)
 #demo_kosm()
+
+listindxsect = range(13)
+coords = []
+names = []
+is_transiting = False
+title = ''
+savname = 'save.pdf'
+for indxsect in listindxsect:
+    tessmaps.tessmaps.make_rect_map(indxsect, coords, names=names,
+                 annotate_bools=is_transiting, title=title,
+                 bkgnd_cmap='Blues', savname=savname)
+
 
 
