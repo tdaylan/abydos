@@ -73,6 +73,11 @@ def main():
     gdat.strgtimestmp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     print('Previously known characterization pipeline for TESS started at %s...' % gdat.strgtimestmp)
         
+    gdat.factmjme = 317.907
+    gdat.factmsmj = 1048.
+    gdat.factrjre = 11.2
+    gdat.factrsrj = 9.95
+    
     # paths
     pathbase = os.environ['KNWNTESS_DATA_PATH'] + '/'
     pathimag = pathbase + 'imag/'
@@ -83,7 +88,6 @@ def main():
     gdat.liststrgstar = ['WASP-77A', 'WASP-43'] 
     gdat.numbstar = len(gdat.liststrgstar)
     gdat.indxstar = np.arange(gdat.numbstar)
-    #listtici = [ 149603524, 38846515, 388104525, 25155310]
     
     print('Will analyze data on the following stars:')
     for strgstar in gdat.liststrgstar:
@@ -91,9 +95,9 @@ def main():
     print
 
     # plot ESMs
-    dictexarcomp = pexo.main.retr_exarcomp()
+    dictexarcomp = pexo.main.retr_exarcomp(gdat)
     
-    esmm = tesstarg.util.retr_esmm(dictexarcomp['tmptplanequb'], dictexarcomp['tmptstar'], dictexarcomp['radiplan'], dictexarcomp['radistar'], \
+    esmm = tesstarg.util.retr_esmm(dictexarcomp['tmptplan'], dictexarcomp['tmptstar'], dictexarcomp['radiplan'], dictexarcomp['radistar'], \
                                                                                                         dictexarcomp['kmag'])
     
     indxplansort = np.argsort(esmm)
@@ -173,11 +177,11 @@ def main():
     pathbaseesmm = pathbase + 'ESM_Top10/'
     gdat.liststrgruns = ['woutTESS', 'alldata']
     gdat.lisrlablruns = ['w/o TESS', 'w/ TESS']
-    allesfitter.postprocessing.plot_viol.plot_viol(pathbaseesmm, gdat.liststrgstar, gdat.liststrgruns, gdat.lisrlablruns, pathimag)
+    allesfitter.postprocessing.plot_viol.plot_comp(pathbaseesmm, gdat.liststrgstar, gdat.liststrgruns, gdat.lisrlablruns, pathimag)
     
     gdat.liststrgruns = ['woutTESS', 'alldata', 'TESS']
     gdat.lisrlablruns = ['w/o TESS', 'w/ TESS', 'o TESS']
-    allesfitter.postprocessing.plot_viol.plot_viol(pathbaseesmm, gdat.liststrgstar, gdat.liststrgruns, gdat.lisrlablruns, pathimag)
+    allesfitter.postprocessing.plot_viol.plot_comp(pathbaseesmm, gdat.liststrgstar, gdat.liststrgruns, gdat.lisrlablruns, pathimag)
     
 
     ## eccentricity and TTV tests
@@ -210,34 +214,6 @@ def main():
         print('Writing to %s...' % path)
         plt.savefig(path)
         plt.close()
-    
-    # plot p values
-    ## threshold p value to conclude significant difference between posteriors with and without TESS
-    pvalthrs = 1e-6
-    
-    ## calculate the KS test statistic between the posteriors
-    numbparacomp = len(lablparacomp[u])
-    pval = np.empty(numbparacomp)
-    for j in range(numbparacomp):
-        kosm, pval[j] = scipy.stats.ks_2samp([gdat.indxrunsfrst[u]][:, j], chan[gdat.indxrunsseco[u]][:, j])
-        kosm, pval[j] = scipy.stats.ks_2samp(chan[gdat.indxrunsfrst[u]][:, j], chan[gdat.indxrunsseco[u]][:, j])
-    
-    ## find the list of parameters whose posterior with and without TESS are unlikely to be drawn from the same distribution
-    figr, axis = plt.subplots(figsize=(12, 5))
-    indxparacomp = np.arange(numbparacomp)
-    axis.plot(indxparacomp, pval, ls='', marker='o')
-    indxparagood = np.where(pval < pvalthrs)[0]
-    if indxparagood.size > 0:
-        axis.plot(indxparacomp[indxparagood], pval[indxparagood], ls='', marker='o', color='r')
-    axis.set_yscale('log')
-    axis.set_xticks(indxparacomp)
-    axis.set_xticklabels(lablparacomp[u])
-    axis.axhline(pvalthrs, ls='--', color='black', alpha=0.3)
-    plt.tight_layout()
-    path = gdat.pathimag + 'kosm_com%d.%s' % (u, gdat.strgplotextn)
-    print('Writing to %s...' % path)
-    figr.savefig(path)
-    plt.close()
     
 main()
     
