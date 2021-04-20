@@ -1,12 +1,12 @@
 import tdpy.util
-import tesstarg.util
+import ephesus.util
 import pexo.main
 from tdpy.util import summgene
 
 import os, sys
 import emcee
 
-import allesfitter.postprocessing.plot_viol
+import allesfitter.postprocessing.plot_char
 
 import matplotlib.pyplot as plt
 from allesfitter import config
@@ -79,26 +79,29 @@ def main():
     gdat.factrsrj = 9.95
     
     # paths
-    pathbase = os.environ['KNWNTESS_DATA_PATH'] + '/'
-    pathimag = pathbase + 'imag/'
-    pathdata = pathbase + 'data/'
+    gdat.pathbase = os.environ['KNWNTESS_DATA_PATH'] + '/'
+    pathimag = gdat.pathbase + 'imag/'
+    pathdata = gdat.pathbase + 'data/'
     os.system('mkdir -p %s' % pathimag)
     os.system('mkdir -p %s' % pathdata)
     
+    gdat.liststrgmodl = ['orbt']
+    gdat.listlablmodl = ['Orbital']
     gdat.liststrgstar = ['WASP-77A', 'WASP-43'] 
     gdat.numbstar = len(gdat.liststrgstar)
     gdat.indxstar = np.arange(gdat.numbstar)
-    
+    gdat.listlablstar = gdat.liststrgstar
+
     print('Will analyze data on the following stars:')
     for strgstar in gdat.liststrgstar:
         print(strgstar)
     print
 
     # plot ESMs
-    dictexarcomp = pexo.main.retr_exarcomp(gdat)
+    dictexarcomp = pexo.main.retr_exarcomp()
     
-    esmm = tesstarg.util.retr_esmm(dictexarcomp['tmptplan'], dictexarcomp['tmptstar'], dictexarcomp['radiplan'], dictexarcomp['radistar'], \
-                                                                                                        dictexarcomp['kmag'])
+    esmm = ephesus.util.retr_esmm(dictexarcomp['tmptplan'], dictexarcomp['tmptstar'], dictexarcomp['radiplan'], dictexarcomp['radistar'], \
+                                                                                                        dictexarcomp['kmagstar'])
     
     indxplansort = np.argsort(esmm)
     
@@ -174,46 +177,17 @@ def main():
 
     
     ## violin plots
-    pathbaseesmm = pathbase + 'ESM_Top10/'
-    gdat.liststrgruns = ['woutTESS', 'alldata']
-    gdat.lisrlablruns = ['w/o TESS', 'w/ TESS']
-    allesfitter.postprocessing.plot_viol.plot_comp(pathbaseesmm, gdat.liststrgstar, gdat.liststrgruns, gdat.lisrlablruns, pathimag)
+    gdat.pathbaseesmm = gdat.pathbase + 'ESM_Top10/'
     
-    gdat.liststrgruns = ['woutTESS', 'alldata', 'TESS']
-    gdat.lisrlablruns = ['w/o TESS', 'w/ TESS', 'o TESS']
-    allesfitter.postprocessing.plot_viol.plot_comp(pathbaseesmm, gdat.liststrgstar, gdat.liststrgruns, gdat.lisrlablruns, pathimag)
+    gdat.liststrgdata = ['woutTESS', 'alldata']
+    gdat.listlabldata = ['w/o TESS', 'w/ TESS']
+    allesfitter.postprocessing.plot_char.plot_char(gdat.pathbaseesmm, gdat.liststrgstar, gdat.liststrgdata, gdat.liststrgmodl, \
+                                                        gdat.listlablstar, gdat.listlabldata, gdat.listlablmodl, pathimag)
     
-
-    ## eccentricity and TTV tests
-    numbrunstest = 2
-    numbtest = 2
-    levi = np.empty((numbrunstest, gdat.numbstar, numbtest))
-    indxrunstest = np.arange(numbrunstest)
-    indxtest = np.arange(numbrunstest)
-    
-    for a in indxtest:
-        for b in indxrunstest:
-            for k, strgstar in enumerate(gdat.liststrgstar):
-                
-                # make sure the run is complete
-
-                # get the edivences
-                levi[b, k, a] = np.random.rand()
-    
-        deltlevi = levi[1, :, :] - levi[0, :, :]
-        figr, axis = plt.subplots(figsize=(12, 6))
-        axis.plot(gdat.indxstar, deltlevi)
-        axis.set_xlabel(gdat.liststrgstar)
-        axis.set_ylabel(r'$\Delta \log$ Z')
-        plt.tight_layout()
-        if a == 0:
-            strg = 'ecce'
-        if a == 1:
-            strg = 'ttvr'
-        path = pathimag + strg + 'levi.pdf'
-        print('Writing to %s...' % path)
-        plt.savefig(path)
-        plt.close()
+    gdat.liststrgdata = ['woutTESS', 'alldata', 'TESS']
+    gdat.lisrlabldata = ['w/o TESS', 'w/ TESS', 'o TESS']
+    allesfitter.postprocessing.plot_char.plot_char(gdat.pathbaseesmm, gdat.liststrgstar, gdat.liststrgdata, gdat.liststrgmodl, \
+                                                        gdat.listlablstar, gdat.listlabldata, gdat.listlablmodl, pathimag)
     
 main()
     
