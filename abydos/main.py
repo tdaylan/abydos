@@ -1,5 +1,5 @@
 import tdpy.util
-import ephesus.util
+import ephesos.util
 import pexo.main
 from tdpy.util import summgene
 
@@ -79,7 +79,7 @@ def main():
     gdat.factrsrj = 9.95
     
     # paths
-    gdat.pathbase = os.environ['KNWNTESS_DATA_PATH'] + '/'
+    gdat.pathbase = os.environ['ABYDOS_DATA_PATH'] + '/'
     pathimag = gdat.pathbase + 'imag/'
     pathdata = gdat.pathbase + 'data/'
     os.system('mkdir -p %s' % pathimag)
@@ -100,7 +100,7 @@ def main():
     # plot ESMs
     dictexarcomp = pexo.main.retr_exarcomp()
     
-    esmm = ephesus.util.retr_esmm(dictexarcomp['tmptplan'], dictexarcomp['tmptstar'], dictexarcomp['radiplan'], dictexarcomp['radistar'], \
+    esmm = ephesos.util.retr_esmm(dictexarcomp['tmptplan'], dictexarcomp['tmptstar'], dictexarcomp['radiplan'], dictexarcomp['radistar'], \
                                                                                                         dictexarcomp['kmagstar'])
     
     indxplansort = np.argsort(esmm)
